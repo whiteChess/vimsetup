@@ -1,0 +1,176 @@
+
+" ====================
+
+set nocompatible              " be iMproved, required
+filetype off                  " required
+
+" set the runtime path to include Vundle and initialize
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+
+Plugin 'gmarik/Vundle.vim'
+Plugin 'tpope/vim-fugitive'
+Plugin 'mileszs/ack.vim'
+Plugin 'kien/ctrlp.vim'
+Plugin 'scrooloose/nerdtree'
+Plugin 'bling/vim-airline'
+Plugin 'altercation/vim-colors-solarized'
+Plugin 'airblade/vim-gitgutter'
+Plugin 'moll/vim-bbye'
+Plugin 'notpratheek/vim-luna'
+Plugin 'davidhalter/jedi-vim'
+Plugin 'L9'
+Plugin 'FuzzyFinder'
+Plugin 'pangloss/vim-javascript'
+Plugin 'scrooloose/syntastic'
+Plugin 'leafgarland/typescript-vim'
+"Plugin 'Quramy/tsuquyomi'
+Plugin 'Shougo/vimproc.vim'
+Plugin 'geekjuice/vim-mocha'
+Plugin 'joonty/vdebug'
+
+call vundle#end()            " required
+filetype plugin indent on    " required
+" To ignore plugin indent changes, instead use:
+"filetype plugin on
+"
+" Brief help
+" :PluginList       - lists configured plugins
+" :PluginInstall    - installs plugins; append `!` to update or just :PluginUpdate
+" :PluginSearch foo - searches for foo; append `!` to refresh local cache
+" :PluginClean      - confirms removal of unused plugins; append `!` to auto-approve removal
+"
+" see :h vundle for more details or wiki for FAQ
+" Put your non-Plugin stuff after this line
+"
+" END OF VUNDLE CONFIGURATION
+
+
+" MY OWN CONFIGURATION
+" ====================
+"augroup group_1
+"    autocmd BufWritePre * %s/\s\+$//e
+"    autocmd BufWritePre * :retab
+"augroup END
+let g:ctrlp_max_files=10000
+let g:ctrlp_custom_ignore = {
+  \ 'dir':  '\.git$\|\.yardoc\|public$|log\|tmp$',
+  \ 'file': '\.so$\|\.dat$|\.DS_Store$'
+  \ }
+let g:ctrlp_user_command = ['.git/', 'git --git-dir=%s/.git ls-files -oc --exclude-standard']
+
+set ts=4
+set expandtab
+set shiftwidth=4
+set guifont=Monaco:h14
+set enc=utf-8
+set nu
+set si
+set backspace=2
+set hid
+set foldmethod=syntax
+set nowrap
+set autoread
+set laststatus=2
+set showmatch
+set nosmartindent " messes with python comments: (http://stackoverflow.com/questions/354097/how-to-configure-vim-to-not-put-comments-at-the-beginning-of-lines-while-editing)
+set cursorline
+set scrolloff=999 " keep cursor centered when scrolling
+set guioptions=ac
+set exrc
+set secure
+set tags=~/work/tags
+set list
+set listchars=trail:…,tab:\|-
+set colorcolumn=100
+
+nnoremap <silent> rts :let _s=@/ <Bar> :%s/\s\+$//e <Bar> :let @/=_s <Bar> :nohl <Bar> :unlet _s <CR>
+nnoremap <silent> cts :retab<Enter>
+imap <D-i> <Esc>
+nmap <D-i> <Esc>
+nmap <C-f> :FufFile<Enter>
+nmap <D-s> <C-s>
+nnoremap <silent> <C-M> <Esc>ddjP
+nnoremap <silent> <C-N> <Esc>ddkP
+
+nmap <C-s> :wa<Enter>
+imap <C-s> <Esc>:wa<Enter>i
+nmap tp :tabp<Enter>
+nmap tn :tabn<Enter>
+
+inoremap <C-a> <Esc>A
+inoremap <C-e> <Esc>I
+nnoremap <silent> SS :mksession! ~/mysession.vim<CR><Enter>
+nnoremap <silent> SR :source ~/mysession.vim<CR><Enter>
+nnoremap E I
+
+nnoremap <leader>f :echo @%<CR>
+noremap <C-Tab> :bn<Enter>
+noremap <C-b> :CtrlPBuffer<Enter>
+noremap gn :NERDTreeFind<CR>
+noremap <leader>n :NERDTreeToggle<CR>
+nnoremap <leader>ev :vsplit $MYVIMRC<cr>
+nnoremap <leader>sv :source $MYVIMRC<CR>:source $MYGVIMRC<CR>
+nnoremap <leader>gb :Gblame<cr>
+nnoremap <leader>gd :Gdiff<cr>
+nnoremap <leader>gs :Gstatus<cr>
+
+
+:syntax enable
+:filetype indent on
+
+syntax on
+
+" If you prefer the Omni-Completion tip window to close when a selection is
+" " made, these lines close it on movement in insert mode or when leaving
+" " insert mode
+augroup omnicompletion
+    autocmd!
+    autocmd CursorMovedI * if pumvisible() == 0|pclose|endif
+    autocmd InsertLeave * if pumvisible() == 0|pclose|endif
+augroup END
+
+
+" Otherwise in MacOSX git commit can fail:
+" https://github.com/bling/vim-airline/issues/79
+let g:airline_theme='dark'
+let g:airline#extensions#branch#enabled=1
+
+let g:solarized_termcolors = 256  "
+colorscheme luna-term
+
+" Open go to definition in vertical split
+"let g:pymode_rope_goto_definition_cmd='Split'
+" Use python-mode mainly for syntax and folding (which is very good)
+" Disable for rope and lint
+let g:pymode_rope = 0
+let g:pymode_lint = 0
+
+" Useful function to split or jump when using rope's go to definition
+function! JumpOrSplit( fname )
+    let bufnum=bufnr(expand(a:fname))
+    let winnum=bufwinnr(bufnum)
+    if winnum != -1
+        " Jump to existing split
+        exe winnum . "wincmd w"
+    else
+        " Make new split as usual
+        exe "vsp " . a:fname
+    endif
+endfunction
+
+command! -nargs=1 Split :call JumpOrSplit("<args>")
+
+function! BetterAwk(s)
+    exe "Ack!\"" . a:s . "\""
+endfunction
+
+command! -nargs=1 BAwk :call BetterAwk("<args>")
+
+let g:jedi#call_signatures_command=''
+let g:jedi#usages_command=''
+
+
+" Syntastic settings
+" ==================
+let g:syntastic_typescript_checkers = ['tslint']
