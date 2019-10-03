@@ -1,4 +1,3 @@
-
 " ====================
 
 set nocompatible              " be iMproved, required
@@ -7,11 +6,10 @@ filetype off                  " required
 " set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
-
+Plugin 'kien/ctrlp.vim'
 Plugin 'gmarik/Vundle.vim'
 Plugin 'tpope/vim-fugitive'
 Plugin 'mileszs/ack.vim'
-Plugin 'kien/ctrlp.vim'
 Plugin 'scrooloose/nerdtree'
 Plugin 'bling/vim-airline'
 Plugin 'altercation/vim-colors-solarized'
@@ -20,7 +18,8 @@ Plugin 'moll/vim-bbye'
 Plugin 'notpratheek/vim-luna'
 Plugin 'davidhalter/jedi-vim'
 Plugin 'L9'
-Plugin 'FuzzyFinder'
+Plugin 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+Plugin 'junegunn/fzf.vim'
 Plugin 'pangloss/vim-javascript'
 Plugin 'scrooloose/syntastic'
 Plugin 'leafgarland/typescript-vim'
@@ -28,8 +27,8 @@ Plugin 'leafgarland/typescript-vim'
 Plugin 'Shougo/vimproc.vim'
 Plugin 'geekjuice/vim-mocha'
 Plugin 'joonty/vdebug'
-
 call vundle#end()            " required
+
 filetype plugin indent on    " required
 " To ignore plugin indent changes, instead use:
 "filetype plugin on
@@ -48,16 +47,15 @@ filetype plugin indent on    " required
 
 " MY OWN CONFIGURATION
 " ====================
+autocmd BufWritePost * call SyncKVM()
+let g:ctrlp_max_files=10000
+"autocmd BufWritePost * echo expand("%")
 "augroup group_1
 "    autocmd BufWritePre * %s/\s\+$//e
 "    autocmd BufWritePre * :retab
 "augroup END
-let g:ctrlp_max_files=10000
-let g:ctrlp_custom_ignore = {
-  \ 'dir':  '\.git$\|\.yardoc\|public$|log\|tmp$',
-  \ 'file': '\.so$\|\.dat$|\.DS_Store$'
-  \ }
-let g:ctrlp_user_command = ['.git/', 'git --git-dir=%s/.git ls-files -oc --exclude-standard']
+augroup group_1
+augroup END
 
 set ts=4
 set expandtab
@@ -79,22 +77,23 @@ set scrolloff=999 " keep cursor centered when scrolling
 set guioptions=ac
 set exrc
 set secure
-set tags=~/work/tags
+set tags=~/git_tree/tags
 set list
 set listchars=trail:…,tab:\|-
-set colorcolumn=100
+set colorcolumn=120
 
 nnoremap <silent> rts :let _s=@/ <Bar> :%s/\s\+$//e <Bar> :let @/=_s <Bar> :nohl <Bar> :unlet _s <CR>
 nnoremap <silent> cts :retab<Enter>
 imap <D-i> <Esc>
 nmap <D-i> <Esc>
 nmap <C-f> :FufFile<Enter>
-nmap <D-s> <C-s>
 nnoremap <silent> <C-M> <Esc>ddjP
 nnoremap <silent> <C-N> <Esc>ddkP
 
+imap <D-s> <C-s>
+nmap <D-s> <C-s>
 nmap <C-s> :wa<Enter>
-imap <C-s> <Esc>:wa<Enter>i
+imap <C-s> <Esc>:wa<Enter>
 nmap tp :tabp<Enter>
 nmap tn :tabn<Enter>
 
@@ -104,16 +103,20 @@ nnoremap <silent> SS :mksession! ~/mysession.vim<CR><Enter>
 nnoremap <silent> SR :source ~/mysession.vim<CR><Enter>
 nnoremap E I
 
+noremap <C-p> <C-w><Right>:GFiles<Enter>
+
 nnoremap <leader>f :echo @%<CR>
 noremap <C-Tab> :bn<Enter>
 noremap <C-b> :CtrlPBuffer<Enter>
 noremap gn :NERDTreeFind<CR>
-noremap <leader>n :NERDTreeToggle<CR>
+noremap gf :NERDTreeFocus<CR>
 nnoremap <leader>ev :vsplit $MYVIMRC<cr>
+noremap <leader>n :NERDTreeToggle<CR>
 nnoremap <leader>sv :source $MYVIMRC<CR>:source $MYGVIMRC<CR>
 nnoremap <leader>gb :Gblame<cr>
 nnoremap <leader>gd :Gdiff<cr>
 nnoremap <leader>gs :Gstatus<cr>
+nnoremap <leader>dfk :call DownloadFromKVM()<cr>
 
 
 :syntax enable
@@ -145,7 +148,28 @@ colorscheme luna-term
 " Disable for rope and lint
 let g:pymode_rope = 0
 let g:pymode_lint = 0
-
+let g:auto_sync_with_kvm = 0
+" sync with my KVM
+function! SyncKVM()
+    let mydir=expand('%:p:h').'/'
+    let myrepo=''
+    if mydir =~'^.*main.*$'
+       let myrepo='main'
+    else
+       let myrepo='affiliate_data'
+    endif
+    let remotedir='/usr/local/git_tree/'.myrepo.'/'.expand('%:h')
+    if g:auto_sync_with_kvm
+        exe "silent! !rsync --exclude='*.git' --exclude='*node_modules' --exclude='*.swp' --exclude='*.swo' -avh -e 'ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null' --progress " mydir " app:".remotedir
+    endif
+endfunction
+function! DownloadFromKVM()
+    let myfile=expand('%:p')
+    let remotefile='/usr/local/git_tree/main/'.expand('%')
+    if myfile =~'^.*main.*$'&&g:auto_sync_with_kvm
+        exe "!rsync --exclude='*.git' --exclude='*node_modules' --exclude='*.swp' --exclude='*.swo' -avh -e 'ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null' --progress app:".remotefile myfile
+    endif
+endfunction
 " Useful function to split or jump when using rope's go to definition
 function! JumpOrSplit( fname )
     let bufnum=bufnr(expand(a:fname))
