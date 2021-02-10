@@ -1,0 +1,18 @@
+{
+  "helloWorld": "Hello World!",
+  "@helloWorld": {
+    "description": "The conventional newborn programmer greeting"
+  },
+  "map": "map",
+  "@map": {
+    "description": "The conventional newborn programmer greeting"
+  },
+  "profile": "profile",
+  "@profile": {
+    "description": "The conventional newborn programmer greeting"
+  },
+  "settings": "settings",
+  "@settings": {
+    "description": "The conventional newborn programmer greeting"
+  }
+}

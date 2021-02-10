@@ -1,0 +1,18 @@
+{
+  "helloWorld": "هلا والله",
+  "@helloWorld": {
+    "description": "The conventional newborn programmer greeting"
+  },
+  "map": "الخريطه",
+  "@map": {
+    "description": "The conventional newborn programmer greeting"
+  },
+  "profile": "حساب",
+  "@settings": {
+    "description": "The conventional newborn programmer greeting"
+  },
+  "settings": "اعدادات",
+  "@settings": {
+    "description": "The conventional newborn programmer greeting"
+  }
+}
